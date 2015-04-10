@@ -26,6 +26,7 @@ import org.xerial.snappy.{Snappy, SnappyInputStream, SnappyOutputStream}
 import org.apache.spark.SparkConf
 import org.apache.spark.annotation.DeveloperApi
 import org.apache.spark.util.Utils
+import org.apache.spark.Logging
 
 /**
  * :: DeveloperApi ::
@@ -57,10 +58,23 @@ private[spark] object CompressionCodec {
   }
 
   def createCodec(conf: SparkConf): CompressionCodec = {
+    logInfo("!!!!!!!!!!!!!!!!!!!!! Starting creating compression code!")
     createCodec(conf, getCodecName(conf))
   }
 
   def createCodec(conf: SparkConf, codecName: String): CompressionCodec = {
+    logInfo("!!!!!!!!!!!!!!!!!!!!! Compression algorithm: " + codecName.toLowerCase)
+
+    // memory info
+    logInfo("=============== Memory Info =================");
+    val mb = 1024*1024
+    val runtime = Runtime.getRuntime
+    logInfo("** Used Memory:  " + (runtime.totalMemory - runtime.freeMemory) / mb)
+    logInfo("** Free Memory:  " + runtime.freeMemory / mb)
+    logInfo("** Total Memory: " + runtime.totalMemory / mb)
+    logInfo("** Max Memory:   " + runtime.maxMemory / mb)
+    logInfo("=============== Memory Info =================");
+
     val codecClass = shortCompressionCodecNames.getOrElse(codecName.toLowerCase, codecName)
     val codec = try {
       val ctor = Utils.classForName(codecClass).getConstructor(classOf[SparkConf])
