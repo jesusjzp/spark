@@ -18,6 +18,7 @@
 package org.apache.spark.io
 
 import java.io.{IOException, InputStream, OutputStream}
+import scala.sys.process._
 
 import com.ning.compress.lzf.{LZFInputStream, LZFOutputStream}
 import net.jpountz.lz4.{LZ4BlockInputStream, LZ4BlockOutputStream}
@@ -73,6 +74,8 @@ private[spark] object CompressionCodec extends Logging {
     logInfo("** Free Memory:  " + runtime.freeMemory / mb)
     logInfo("** Total Memory: " + runtime.totalMemory / mb)
     logInfo("** Max Memory:   " + runtime.maxMemory / mb)
+    logInfo("** CPU: \n")
+    logInfo("ps aux | grep java".!!)
     logInfo("=============== Memory Info =================");
 
     val codecClass = shortCompressionCodecNames.getOrElse(codecName.toLowerCase, codecName)
