@@ -1164,14 +1164,24 @@ private[spark] class BlockManager(
    * Wrap an output stream for compression if block compression is enabled for its block type
    */
   def wrapForCompression(blockId: BlockId, s: OutputStream): OutputStream = {
-    if (shouldCompress(blockId)) compressionCodec.compressedOutputStream(s) else s
+    if (shouldCompress(blockId)) {
+      logInfo("======== Should compress output stream =======");
+      compressionCodec.compressedOutputStream(s)
+    } else {
+      s
+    }
   }
 
   /**
    * Wrap an input stream for compression if block compression is enabled for its block type
    */
   def wrapForCompression(blockId: BlockId, s: InputStream): InputStream = {
-    if (shouldCompress(blockId)) compressionCodec.compressedInputStream(s) else s
+    if (shouldCompress(blockId)) {
+      logInfo("======== Should compress input stream =======");
+      compressionCodec.compressedInputStream(s)
+    } else {
+      s
+    }
   }
 
   /** Serializes into a stream. */
@@ -1182,6 +1192,7 @@ private[spark] class BlockManager(
       serializer: Serializer = defaultSerializer): Unit = {
     val byteStream = new BufferedOutputStream(outputStream)
     val ser = serializer.newInstance()
+    logInfo("======== Serializes into a stream =======");
     ser.serializeStream(wrapForCompression(blockId, byteStream)).writeAll(values).close()
   }
 
@@ -1191,6 +1202,7 @@ private[spark] class BlockManager(
       values: Iterator[Any],
       serializer: Serializer = defaultSerializer): ByteBuffer = {
     val byteStream = new ByteArrayOutputStream(4096)
+    logInfo("======== Serializes data =======");
     dataSerializeStream(blockId, byteStream, values, serializer)
     ByteBuffer.wrap(byteStream.toByteArray)
   }
@@ -1205,6 +1217,7 @@ private[spark] class BlockManager(
       serializer: Serializer = defaultSerializer): Iterator[Any] = {
     bytes.rewind()
     val stream = wrapForCompression(blockId, new ByteBufferInputStream(bytes, true))
+    logInfo("======== Deserializes data =======");
     serializer.newInstance().deserializeStream(stream).asIterator
   }
 
