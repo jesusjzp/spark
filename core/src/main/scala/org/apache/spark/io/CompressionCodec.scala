@@ -59,24 +59,23 @@ private[spark] object CompressionCodec extends Logging {
   }
 
   def createCodec(conf: SparkConf): CompressionCodec = {
-    logInfo("!!!!!!!!!!!!!!!!!!!!! Starting creating compression code!")
+    logInfo("=============== Starting creating compression code!")
     createCodec(conf, getCodecName(conf))
   }
 
   def createCodec(conf: SparkConf, codecName: String): CompressionCodec = {
-    logInfo("!!!!!!!!!!!!!!!!!!!!! Compression algorithm: " + codecName.toLowerCase)
+    logInfo("=============== Compression algorithm: " + codecName.toLowerCase)
 
     // memory info
-    logInfo("=============== Memory Info =================");
+    logInfo("=============== Memory Info =================")
     val mb = 1024*1024
     val runtime = Runtime.getRuntime
     logInfo("** Used Memory:  " + (runtime.totalMemory - runtime.freeMemory) / mb)
     logInfo("** Free Memory:  " + runtime.freeMemory / mb)
     logInfo("** Total Memory: " + runtime.totalMemory / mb)
     logInfo("** Max Memory:   " + runtime.maxMemory / mb)
-    logInfo("** CPU: \n")
-    logInfo("ps aux | grep java".!!)
-    logInfo("=============== Memory Info =================");
+    logInfo("** CPU:" + ("ps aux" #| "grep JavaWordCount").!!.split("\\s+")(2))
+    logInfo("=============== Memory Info =================")
 
     val codecClass = shortCompressionCodecNames.getOrElse(codecName.toLowerCase, codecName)
     val codec = try {
@@ -124,10 +123,18 @@ class LZ4CompressionCodec(conf: SparkConf) extends CompressionCodec {
 
   override def compressedOutputStream(s: OutputStream): OutputStream = {
     val blockSize = conf.getSizeAsBytes("spark.io.compression.lz4.blockSize", "32k").toInt
-    new LZ4BlockOutputStream(s, blockSize)
+    val start = System.nanoTime
+    val res = new LZ4BlockOutputStream(s, blockSize)
+    println("%d microseconds, output stream".format((System.nanoTime - start) / 1000))
+    res
   }
 
-  override def compressedInputStream(s: InputStream): InputStream = new LZ4BlockInputStream(s)
+  override def compressedInputStream(s: InputStream): InputStream = {
+    val start = System.nanoTime
+    val res = new LZ4BlockInputStream(s)
+    println("%d microseconds, input stream".format((System.nanoTime - start) / 1000))
+    res
+  }
 }
 
 
@@ -146,7 +153,9 @@ class LZFCompressionCodec(conf: SparkConf) extends CompressionCodec {
     new LZFOutputStream(s).setFinishBlockOnFlush(true)
   }
 
-  override def compressedInputStream(s: InputStream): InputStream = new LZFInputStream(s)
+  override def compressedInputStream(s: InputStream): InputStream = {
+    new LZFInputStream(s)
+  }
 }
 
 
@@ -173,7 +182,9 @@ class SnappyCompressionCodec(conf: SparkConf) extends CompressionCodec {
     new SnappyOutputStreamWrapper(new SnappyOutputStream(s, blockSize))
   }
 
-  override def compressedInputStream(s: InputStream): InputStream = new SnappyInputStream(s)
+  override def compressedInputStream(s: InputStream): InputStream = {
+    new SnappyInputStream(s)
+  }
 }
 
 /**
