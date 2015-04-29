@@ -1188,7 +1188,6 @@ private[spark] class BlockManager(
    */
   def wrapForCompression(blockId: BlockId, s: OutputStream): OutputStream = {
     if (shouldCompress(blockId)) {
-      logInfo("======== Should compress output stream =======");
       compressionCodec.compressedOutputStream(s)
     } else {
       s
@@ -1200,7 +1199,6 @@ private[spark] class BlockManager(
    */
   def wrapForCompression(blockId: BlockId, s: InputStream): InputStream = {
     if (shouldCompress(blockId)) {
-      logInfo("======== Should compress input stream =======");
       compressionCodec.compressedInputStream(s)
     } else {
       s
