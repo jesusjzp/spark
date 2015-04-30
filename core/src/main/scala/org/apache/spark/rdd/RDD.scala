@@ -154,6 +154,7 @@ abstract class RDD[T: ClassTag](
    * have a storage level set yet..
    */
   def persist(newLevel: StorageLevel): this.type = {
+    logInfo(" ========== Start to persist RDD with StorageLevel: " + newLevel.toInt.toString)
     // TODO: Handle changes of StorageLevel
     if (storageLevel != StorageLevel.NONE && newLevel != storageLevel) {
       throw new UnsupportedOperationException(
@@ -377,7 +378,7 @@ abstract class RDD[T: ClassTag](
 
   /**
    * Return a sampled subset of this RDD.
-   * 
+   *
    * @param withReplacement can elements be sampled multiple times (replaced when sampled out)
    * @param fraction expected size of the sample as a fraction of this RDD's size
    *  without replacement: probability that each element is chosen; fraction must be [0, 1]
@@ -1177,7 +1178,7 @@ abstract class RDD[T: ClassTag](
         } else {
           // the left side of max is >=1 whenever partsScanned >= 2
           numPartsToTry = Math.max((1.5 * num * partsScanned / buf.size).toInt - partsScanned, 1)
-          numPartsToTry = Math.min(numPartsToTry, partsScanned * 4) 
+          numPartsToTry = Math.min(numPartsToTry, partsScanned * 4)
         }
       }
 
