@@ -1266,7 +1266,6 @@ abstract class RDD[T: ClassTag](
    */
   def take(num: Int): Array[T] = withScope {
     if (num == 0) {
-<<<<<<< HEAD
       new Array[T](0)
     } else {
       val buf = new ArrayBuffer[T]
@@ -1287,28 +1286,6 @@ abstract class RDD[T: ClassTag](
             numPartsToTry = Math.max((1.5 * num * partsScanned / buf.size).toInt - partsScanned, 1)
             numPartsToTry = Math.min(numPartsToTry, partsScanned * 4)
           }
-=======
-      return new Array[T](0)
-    }
-
-    val buf = new ArrayBuffer[T]
-    val totalParts = this.partitions.length
-    var partsScanned = 0
-    while (buf.size < num && partsScanned < totalParts) {
-      // The number of partitions to try in this iteration. It is ok for this number to be
-      // greater than totalParts because we actually cap it at totalParts in runJob.
-      var numPartsToTry = 1
-      if (partsScanned > 0) {
-        // If we didn't find any rows after the previous iteration, quadruple and retry. Otherwise,
-        // interpolate the number of partitions we need to try, but overestimate it by 50%.
-        // We also cap the estimation in the end.
-        if (buf.size == 0) {
-          numPartsToTry = partsScanned * 4
-        } else {
-          // the left side of max is >=1 whenever partsScanned >= 2
-          numPartsToTry = Math.max((1.5 * num * partsScanned / buf.size).toInt - partsScanned, 1)
-          numPartsToTry = Math.min(numPartsToTry, partsScanned * 4)
->>>>>>> Updated persist log.
         }
 
         val left = num - buf.size
